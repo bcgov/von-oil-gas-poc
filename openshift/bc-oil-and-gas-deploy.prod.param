@@ -1,0 +1,35 @@
+#=========================================================
+# OpenShift template parameters for:
+# Component: .
+# Template File: templates/agents/bc-oil-and-gas-deploy.json
+#=========================================================
+# NAME=bc-oil-and-gas
+# APP_GROUP=bc-oil-and-gas
+# IMAGE_NAMESPACE=devex-von-permitify-tools
+TAG_NAME=prod
+# APPLICATION_URL=
+# ENDPOINT_URL=
+# TCP_SOCKET_FAMILY=IPV4
+# CONFIG_ROOT=von-oil-gas-agent/config
+# HOST_PORT=8080
+# ENVIRONMENT=default
+# GENESIS_URL=
+# INDY_LEDGER_URL=http://test.bcovrin.vonx.io
+# LEDGER_PROTOCOL_VERSION=
+# AUTO_REGISTER_DID=1
+# LOG_LEVEL=INFO
+# PYTHON_ENV=development
+# TOB_API_URL=
+# TOB_APP_URL=
+# INDY_WALLET_TYPE=postgres_storage
+# POSTGRESQL_WALLET_HOST=wallet-db
+# POSTGRESQL_WALLET_PORT=5432
+# POSTGRESQL_WALLET_NAME=bc_oil_gas_issuer
+# WALLET_ENCRYPTION_KEY=[a-zA-Z0-9_~!@#$%^&*()-=<>,.?;:|]{16}
+# INDY_WALLET_SEED=[a-zA-Z0-9_~!@#$%^&*()-=<>,.?;:|]{16}
+# INDY_WALLET_DID=[a-zA-Z0-9_~!@#$%^&*()-=<>,.?;:|]{16}
+# WALLET_CREDENTIAL_STORE_NAME=bc-oil-and-gas-wallet-credentials
+# CPU_LIMIT=250m
+# MEMORY_LIMIT=256Mi
+# CPU_REQUEST=10m
+# MEMORY_REQUEST=64Mi
