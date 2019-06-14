@@ -1,0 +1,64 @@
+- name: well-permit.oil-gas-commission
+  version: 1.0.0
+  description: The well-permit credential issued by Oil and Gas Commission
+  attributes:
+    corp_num:
+      description: ID issued by the registering organization
+      data_type: ui_text
+      required: true
+    expiry_date:
+      description: Expiry Date
+      data_type: ui_date
+      required: false
+    wa_number:
+      description: Well Number
+      data_type: ui_text
+      required: true
+    effective_date:
+      description: Effective Date
+      data_type: ui_date
+      required: true
+    well_name:
+      description: Well Name
+      data_type: ui_text
+      required: true
+    issued_date:
+      description: Issued Date
+      data_type: ui_date
+      required: true
+    well_status:
+      description: Well Status
+      data_type: ui_select
+      required: true
+- name: facility-permit.oil-gas-commission
+  version: 1.0.0
+  description: The facility-permit credential issued by Oil and Gas Commission
+  attributes:
+    corp_num:
+      description: ID issued by the registering organization
+      data_type: ui_text
+      required: true
+    facility_id:
+      description: Facility Id
+      data_type: ui_text
+      required: true
+    expiry_date:
+      description: Expiry Date
+      data_type: ui_date
+      required: false
+    facility_status:
+      description: Facility Status
+      data_type: ui_select
+      required: true
+    effective_date:
+      description: Effective Date
+      data_type: ui_date
+      required: true
+    facility_name:
+      description: Facility Name
+      data_type: ui_text
+      required: true
+    issued_date:
+      description: Issued Date
+      data_type: ui_date
+      required: true

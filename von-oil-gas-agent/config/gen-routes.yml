@@ -1,0 +1,95 @@
+forms:
+  oil-gas-commissionwell-permit:
+    path: /oil-gas-commission/well-permit
+    type: issue-credential
+    schema_name: well-permit.oil-gas-commission
+    page_title: Title for well-permit.oil-gas-commission
+    title: Title for well-permit.oil-gas-commission
+    template: bcgov.index.html
+    description: The well-permit credential issued by Oil and Gas Commission
+    explanation: Use the form below to issue a Credential.
+    proof_request:
+      id: bcreg_registration
+      connection_id: bctob
+    fields:
+    - name: corp_num
+      label: corp_num
+      type: text
+      required: true
+    - name: expiry_date
+      label: expiry_date
+      type: date
+      required: false
+    - name: wa_number
+      label: wa_number
+      type: text
+      required: true
+    - name: effective_date
+      label: effective_date
+      type: date
+      required: true
+    - name: well_name
+      label: well_name
+      type: text
+      required: true
+    - name: issued_date
+      label: issued_date
+      type: date
+      required: true
+    - name: well_status
+      label: well_status
+      type: select
+      options:
+      - todo-1
+      - todo-2
+      - todo-3
+      required: true
+    mapping:
+      attributes: []
+  oil-gas-commissionfacility-permit:
+    path: /oil-gas-commission/facility-permit
+    type: issue-credential
+    schema_name: facility-permit.oil-gas-commission
+    page_title: Title for facility-permit.oil-gas-commission
+    title: Title for facility-permit.oil-gas-commission
+    template: bcgov.index.html
+    description: The facility-permit credential issued by Oil and Gas Commission
+    explanation: Use the form below to issue a Credential.
+    proof_request:
+      id: bcreg_registration
+      connection_id: bctob
+    fields:
+    - name: corp_num
+      label: corp_num
+      type: text
+      required: true
+    - name: facility_id
+      label: facility_id
+      type: text
+      required: true
+    - name: expiry_date
+      label: expiry_date
+      type: date
+      required: false
+    - name: facility_status
+      label: facility_status
+      type: select
+      options:
+      - todo-1
+      - todo-2
+      - todo-3
+      required: true
+    - name: effective_date
+      label: effective_date
+      type: date
+      required: true
+    - name: facility_name
+      label: facility_name
+      type: text
+      required: true
+    - name: issued_date
+      label: issued_date
+      type: date
+      required: true
+    mapping:
+      attributes: []

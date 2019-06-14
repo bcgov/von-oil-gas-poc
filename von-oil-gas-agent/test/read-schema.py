@@ -141,6 +141,7 @@ timezone = pytz.timezone("America/Los_Angeles")
 
 in_file = sys.argv[1]
 in_dir = os.path.dirname(in_file)
+out_schemas = in_dir + '/gen-schemas.yml'
 out_services = in_dir + '/gen-services.yml'
 out_routes = in_dir + '/gen-routes.yml'
 out_data = in_dir + '/gen-data.json'
@@ -149,14 +150,25 @@ with open(in_file, 'r') as stream:
     try:
         schemas = yaml.load(stream) 
 
+        gschemas = bare_array()
+
         services = bare_dict()
         add_dict(services, 'issuers')
         services['issuers']['myorg'] = bare_dict()
         services['issuers']['myorg']['credential_types'] = bare_array()
+
         routes = bare_dict()
         routes['forms'] = bare_dict()
+
         testdata = bare_array()
         for schema in schemas:
+            # generate schema-level stuff for schemas.yml
+            gschema = bare_dict()
+            gschema['name'] = schema['name']
+            gschema['version'] = schema['version']
+            gschema['description'] = schema['description']
+            gschema['attributes'] = bare_dict()
+
             # generate schema-level stuff for services.yml
             service = bare_dict()
             service['description'] = schema['description']
@@ -182,6 +194,14 @@ with open(in_file, 'r') as stream:
             service['topic']['type'] = bare_dict()
             service['topic']['type']['input'] = 'registration'
             service['topic']['type']['from'] = 'value'
+            # for relationship:
+            if 'related_topic' in schema:
+                service['topic']['related_source_id'] = bare_dict()
+                service['topic']['related_source_id']['input'] = schema['related_topic']
+                service['topic']['related_source_id']['from'] = 'claim'
+                service['topic']['related_type'] = bare_dict()
+                service['topic']['related_type']['input'] = 'registration'
+                service['topic']['related_type']['from'] = 'value'
             if 'cardinality' in schema:
                 service['cardinality_fields'] = bare_array()
                 service['cardinality_fields'].append(schema['cardinality'])
@@ -191,6 +211,21 @@ with open(in_file, 'r') as stream:
             has_name = False
             has_address = False
             for attr in schema['attributes'].keys():
+                if schema['attributes'][attr]['data_type'] == 'ui_address':
+                    addr_fields = ['addressee', 'address_line_1', 'city', 'province', 'postal_code', 'country']
+                    for i in range(len(addr_fields)):
+                        gmodel = bare_dict()
+                        gmodel['description'] = addr_fields[i]
+                        gmodel['data_type'] = 'ui_text'
+                        gmodel['required'] = schema['attributes'][attr]['required']
+                        gschema['attributes'][addr_fields[i]] = gmodel
+                else:
+                    gmodel = bare_dict()
+                    gmodel['description'] = schema['attributes'][attr]['description']
+                    gmodel['data_type'] = schema['attributes'][attr]['data_type']
+                    gmodel['required'] = schema['attributes'][attr]['required']
+                    gschema['attributes'][attr] = gmodel
+
                 model = bare_dict()
                 if schema['attributes'][attr]['data_type'] == 'ui_name':
                     if not has_name:
@@ -260,6 +295,13 @@ with open(in_file, 'r') as stream:
                 routes['forms'][form_name]['proof_request'] = bare_dict()
                 routes['forms'][form_name]['proof_request']['id'] = schema['proof_request']
                 routes['forms'][form_name]['proof_request']['connection_id'] = 'bctob'
+            if 'related_credentials' in schema:
+                routes['forms'][form_name]['related_credentials'] = bare_dict()
+                for related_cred in schema['related_credentials']:
+                    routes['forms'][form_name]['related_credentials'][related_cred] = bare_dict()
+                    for attr in schema['related_credentials'][related_cred]:
+                        routes['forms'][form_name]['related_credentials'][related_cred][attr] = schema['related_credentials'][related_cred][attr]
+
             # optionally can serve javascript
             #js_includes:
             #  - src: js/bc_registries.js
@@ -296,8 +338,8 @@ with open(in_file, 'r') as stream:
                     elif schema['attributes'][attr]['data_type'] != 'ui_address':
                         routes['forms'][form_name]['fields'].append(field)
 
-            routes['forms'][form_name]['mappings'] = bare_dict()
-            routes['forms'][form_name]['mappings']['attributes'] = bare_array()
+            routes['forms'][form_name]['mapping'] = bare_dict()
+            routes['forms'][form_name]['mapping']['attributes'] = bare_array()
             for attr in schema['attributes'].keys():
                 if schema['attributes'][attr]['data_type'].startswith('helper_'):
                     attribute = bare_dict()
@@ -313,17 +355,23 @@ with open(in_file, 'r') as stream:
                             attribute['source'] = 'now_iso'
                         else:
                             attribute['source'] = schema['attributes'][attr]['data_type']
-                    routes['forms'][form_name]['mappings']['attributes'].append(attribute)
+                    routes['forms'][form_name]['mapping']['attributes'].append(attribute)
 
-            # no worries about writing jwon output for test data
+            gschemas.append(gschema)
+
+            # no worries about writing json output for test data
             datapacket = {}
             datapacket['schema'] = schema['name']
             datapacket['version'] = schema['version']
             datapacket['attributes'] = {}
-            for attr in schema['attributes'].keys():
-                datapacket['attributes'][attr] = sample_data(attr, schema['attributes'][attr]['data_type'])
+            for attr in gschema['attributes'].keys():
+                datapacket['attributes'][attr] = sample_data(attr, gschema['attributes'][attr]['data_type'])
             testdata.append(datapacket)
 
+        print('Writing', out_schemas)
+        with open(out_schemas, 'w') as outfile:
+            yaml.dump(gschemas, outfile, default_flow_style=False, Dumper=CustomDumper)
+        
         print('Writing', out_services)
         with open(out_services, 'w') as outfile:
             yaml.dump(services, outfile, default_flow_style=False, Dumper=CustomDumper)
