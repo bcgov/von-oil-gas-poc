@@ -1,0 +1,26 @@
+[
+    {
+        "attributes": {
+            "registration_id": "BC0908182", 
+            "effective_date": "2019-06-14T20:20:25.399745+00:00", 
+            "issued_date": "2019-06-14T20:20:25.399775+00:00", 
+            "wa_number": "12345", 
+            "well_name": "Well Well Well", 
+            "well_status": "OK"
+        }, 
+        "schema": "well-permit.oil-gas-commission", 
+        "version": "1.0.0"
+    }, 
+    {
+        "attributes": {
+            "registration_id": "BC0908182", 
+            "effective_date": "2019-06-14T20:20:25.400310+00:00", 
+            "facility_id": "67890", 
+            "facility_name": "May Facility Name", 
+            "facility_status": "Bueno", 
+            "issued_date": "2019-06-14T20:20:25.400336+00:00"
+        }, 
+        "schema": "facility-permit.oil-gas-commission", 
+        "version": "1.0.0"
+    }
+]
