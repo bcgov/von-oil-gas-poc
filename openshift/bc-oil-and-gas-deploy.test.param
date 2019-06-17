@@ -4,6 +4,7 @@
 # Template File: templates/agents/bc-oil-and-gas-deploy.json
 #=========================================================
 # NAME=bc-oil-and-gas
+# APP_NAME=bc-oil-and-gas-agent
 # APP_GROUP=bc-oil-and-gas
 # IMAGE_NAMESPACE=devex-von-permitify-tools
 TAG_NAME=test
