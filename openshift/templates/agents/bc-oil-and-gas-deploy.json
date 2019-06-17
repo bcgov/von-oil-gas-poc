@@ -368,7 +368,7 @@
       "displayName": "Config Root",
       "description": "The root directory containing the application configuration.",
       "required": true,
-      "value": "von-oil-gas-agent/config"
+      "value": "./config"
     },
     {
       "name": "HOST_PORT",
