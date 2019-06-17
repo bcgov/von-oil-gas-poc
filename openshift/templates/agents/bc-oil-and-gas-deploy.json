@@ -129,14 +129,6 @@
             }
           },
           "spec": {
-            "volumes": [
-              {
-                "name": "${NAME}-data",
-                "persistentVolumeClaim": {
-                  "claimName": "${NAME}"
-                }
-              }
-            ],
             "containers": [
               {
                 "name": "${NAME}",
@@ -300,8 +292,7 @@
                     "cpu": "${CPU_LIMIT}",
                     "memory": "${MEMORY_LIMIT}"
                   }
-                },
-                "volumeMounts": []
+                }
               }
             ]
           }
