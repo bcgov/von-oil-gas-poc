@@ -209,14 +209,14 @@ verifiers:
       type: TheOrgBook
       api_url: $TOB_API_URL
     wallet:
-      seed: "tob-verifier-wallet-000000000001"
+      seed: ${TOB_WALLET_SEED:-tob-verifier-wallet-000000000001}
 
 proof_requests:
   bcreg_registration:
     version: '1.0.0'
     schemas:
       - key:
-          did: G3NAEYfm17qsEd9iRLK3wZ
+          did: ${TOB_DID:-G3NAEYfm17qsEd9iRLK3wZ}
           name: registration.registries.ca
           version: '1.0.42'
         attributes:
