@@ -112,7 +112,7 @@
               "from": {
                 "kind": "ImageStreamTag",
                 "namespace": "${IMAGE_NAMESPACE}",
-                "name": "agent:${TAG_NAME}"
+                "name": "${NAME}:${TAG_NAME}"
               }
             }
           }
