@@ -1,0 +1,254 @@
+#!/bin/bash
+export MSYS_NO_PATHCONV=1
+SCRIPT_HOME="$( cd "$( dirname "$0" )" && pwd )"
+
+# =================================================================================================================
+# Usage:
+# -----------------------------------------------------------------------------------------------------------------
+usage () {
+  cat <<-EOF
+
+  Manage the BC Oil and Gas Commission issuer services within a given OpenShift environment.
+
+  Usage:
+    $0 [options] [commands]
+
+  Example:
+    $0 -e test scaleDown
+    - This will scale down all of the issuer services in the TEST environment.
+
+  Options:
+  ========
+    -h prints the usage for the script
+    -e <Environment> the environment (dev/test/prod) into which you are deploying (default: ${DEPLOYMENT_ENV_NAME})
+    -l apply local settings and parameters
+    -p <profile> load a specific settings profile; setting.<profile>.sh
+    -P Use the default settings profile; settings.sh.  Use this flag to ignore all but the default
+       settings profile when there is more than one settings profile defined for a project.
+    -x run the script in debug mode to see what's happening
+
+  Commands:
+  ========
+    scaleUp
+      - Scale down one or more issuer service.  By default all issuer services are affected.
+        To scale select issuer services list them following the command.
+        For example;
+          $0 -e test scaleUp bc-registries worksafe-bc
+
+    scaleDown
+      - Scale up one or more issuer services.  By default all issuer services are affected.
+        To scale select issuer services list them following the command.
+        For example;
+          $0 -e test scaleDown bc-registries worksafe-bc
+
+    recycle
+      - Recycle up one or more issuer services.  By default all issuer services are affected.
+        To recycle select issuer services list them following the command.
+        For example;
+          $0 -e test recycle bc-registries worksafe-bc
+
+    reset
+      - Reset one or more issuer services.  By default all issuer services are affected.
+        To reset select issuer services list them following the command.
+        For example;
+          $0 -e test reset bc-registries worksafe-bc
+
+        Performs the following operations:
+        - Delete the persistent indy wallet information.
+        - Scale down the pod.
+        - Register the environment's DID with the ledger.
+
+    getIssuerServicePods
+      - Get a list of issuer service pods running in a given environment.
+EOF
+exit 1
+}
+
+# -----------------------------------------------------------------------------------------------------------------
+# Initialization:
+# -----------------------------------------------------------------------------------------------------------------
+while getopts p:Pe:lxh FLAG; do
+  case $FLAG in
+    p ) export PROFILE=$OPTARG ;;
+    P ) export IGNORE_PROFILES=1 ;;
+    e ) export DEPLOYMENT_ENV_NAME=$OPTARG ;;
+    l ) export APPLY_LOCAL_SETTINGS=1 ;;
+    x ) export DEBUG=1 ;;
+    h ) usage ;;
+    \? ) #unrecognized option - show help
+      echo -e \\n"Invalid script option: -${OPTARG}"\\n
+      usage
+      ;;
+  esac
+done
+shift $((OPTIND-1))
+
+if [ ! -z "${DEBUG}" ]; then
+  set -x
+fi
+
+# Check for required options ...
+if [ -z "${DEPLOYMENT_ENV_NAME}" ]; then
+  _red='\033[0;31m'
+  _nc='\033[0m' # No Color
+  echo -e "${_red}You MUST specify an environment name using the '-e' flag.${_nc}"
+  echo -e "${_red}Assuming a default would have unwanted consequences.${_nc}"
+  usage
+fi
+
+# Load the project settings and functions ...
+_includeFile="ocFunctions.inc"
+_settingsFile="settings.sh"
+if [ ! -z $(type -p ${_includeFile}) ]; then
+  _includeFilePath=$(type -p ${_includeFile})
+  export OCTOOLSBIN=$(dirname ${_includeFilePath})
+
+  if [ -f ${OCTOOLSBIN}/${_settingsFile} ]; then
+    . ${OCTOOLSBIN}/${_settingsFile}
+  fi
+
+  if [ -f ${OCTOOLSBIN}/${_includeFile} ]; then
+    . ${OCTOOLSBIN}/${_includeFile}
+  fi
+else
+  _red='\033[0;31m'
+  _yellow='\033[1;33m'
+  _nc='\033[0m' # No Color
+  echo -e \\n"${_red}${_includeFile} could not be found on the path.${_nc}"
+  echo -e "${_yellow}Please ensure the openshift-developer-tools are installed on and registered on your path.${_nc}"
+  echo -e "${_yellow}https://github.com/BCDevOps/openshift-developer-tools${_nc}"
+fi
+
+# -----------------------------------------------------------------------------------------------------------------
+# Functions:
+# -----------------------------------------------------------------------------------------------------------------
+reset() {
+  _pods=${@}
+  if [ -z "${_pods}" ]; then
+    echo -e \\n"reset; Missing parameter!"\\n
+    exit 1
+  fi
+
+  _podsLoop=${_pods} # required as the original _pods array gets somehow modified when performing deleteWallets
+  _wallets=()
+  for _pod in ${_pods}; do
+    _walletName=$(getWalletName ${_pod})
+    _wallets+=($_walletName)
+    scaleDown ${_pod}
+  done
+
+  printAndWait "Wait for the all the pods to completely scale down before continuing."
+
+  i=0
+  for _pod in ${_podsLoop}; do
+    deleteEnterpriseWallet ${_pod} ${_wallets[$i]}
+    exitOnError
+    let "i++"
+  done
+
+  printAndWait "The wallets for the specified pods were reset, they will be re-created when the pods start up again. Hit return to scale the pods up and finish."
+
+  for _pod in ${_podsLoop}; do
+    scaleUp ${_pod}
+  done
+}
+
+deleteEnterpriseWallet() {
+  _podName=${1}
+  _walletName=${2}
+  _walletDbPodName=${WALLET_DB_POD_NAME:-wallet-db}
+  if [ -z "${_podName}" ]; then
+    echo -e \\n"deleteEnterpriseWallet; Missing parameter [podName]!"\\n
+    exit 1
+  fi
+
+  if [ -z "${_walletName}" ]; then
+    echo -e \\n"deleteWallets; Missing parameter [walletName]!"\\n
+    exit 1
+  fi
+
+  if [ -z "${WALLET_DB_INSTANCE_NAME}" ]; then
+    export WALLET_DB_INSTANCE_NAME=$(getPodByName.sh ${_walletDbPodName})
+  fi
+
+  if [ ! -z "${WALLET_DB_INSTANCE_NAME}" ]; then
+    _sql="DROP DATABASE ${_walletName}"
+    _pSqlCmd="psql -U postgres -ac \"${_sql}\""
+
+    runInContainer \
+      ${_walletDbPodName} \
+      "${_pSqlCmd}"
+  else
+    echo -e "No enterprise wallet instance was found in this environment ..."
+  fi
+}
+
+getWalletName() {
+  _podName=${1}
+  if [ -z "${_podName}" ]; then
+    echo -e \\n"getWalletName; Missing parameter!"\\n
+    exit 1
+  fi
+
+  runInContainer \
+    "${_podName}" \
+    "env | grep POSTGRESQL_WALLET_NAME | sed 's~POSTGRESQL_WALLET_NAME=\(.*\)$~\1~'"
+}
+
+recycle() {
+  _pods=${@}
+  if [ -z "${_pods}" ]; then
+    echo -e \\n"recycle; Missing parameter!"\\n
+    exit 1
+  fi
+
+  scaleDown ${_pods}
+  printAndWait "Wait for all of the pods to scale down completely before continuing."
+  scaleUp ${_pods}
+}
+
+# Add any non-issurer service pods to this list
+NON_ISSURER_SERVICE_PODS="bc-oil-and-gas wallet-db"
+
+getIssuerServicePods() {
+  _pods=$(getAllPods ${@})
+  _issuerServicePods=$(removeFromList "${_pods}" "${NON_ISSURER_SERVICE_PODS}")
+  echo "${_issuerServicePods}"
+}
+# =================================================================================================================
+
+pushd ${SCRIPT_HOME} >/dev/null
+_cmd=$(toLower ${1})
+shift
+
+case "${_cmd}" in
+  scaleup)
+    switchProject
+    PODS=$(getIssuerServicePods ${@})
+    scaleUp ${PODS}
+    ;;
+  scaledown)
+    switchProject
+    PODS=$(getIssuerServicePods ${@})
+    scaleDown ${PODS}
+    ;;
+  recycle)
+    switchProject
+    PODS=$(getIssuerServicePods ${@})
+    recycle ${PODS}
+    ;;
+  reset)
+    switchProject
+    PODS=$(getIssuerServicePods ${@})
+    reset ${PODS}
+    ;;
+  getpods)
+    getIssuerServicePods ${@}
+    ;;
+  *)
+    echoWarning "Unrecognized command; ${_cmd}"
+    usage
+    ;;
+esac
+
+popd >/dev/null
