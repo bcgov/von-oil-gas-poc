@@ -8,6 +8,7 @@ APP_NAME=bc-oil-and-gas-agent
 APP_GROUP=bc-oil-and-gas
 IMAGE_NAMESPACE=devex-von-permitify-tools
 TAG_NAME=dev
+APPLICATION_DOMAIN=bc-oil-and-gas-agent-dev.pathfinder.gov.bc.ca
 APPLICATION_URL=https://bc-oil-and-gas-agent-dev.pathfinder.gov.bc.ca
 ENDPOINT_URL=https://bc-oil-and-gas-agent-dev.pathfinder.gov.bc.ca
 TCP_SOCKET_FAMILY=IPV4

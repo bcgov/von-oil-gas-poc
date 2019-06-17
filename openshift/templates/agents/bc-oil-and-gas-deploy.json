@@ -64,7 +64,7 @@
         }
       },
       "spec": {
-        "host": "${ENDPOINT_URL}",
+        "host": "${APPLICATION_DOMAIN}",
         "tls": {
           "insecureEdgeTerminationPolicy": "Redirect",
           "termination": "edge"
@@ -344,6 +344,12 @@
       "description": "The TAG name for this environment, e.g., dev, test, prod",
       "required": true,
       "value": "dev"
+    },
+    {
+      "name": "APPLICATION_DOMAIN",
+      "displayName": "Application Hostname",
+      "description": "The exposed hostname that will route to the service, e.g., myappname.pathfinder.gov.bc.ca, if left blank a value will be defaulted.",
+      "value": "bc-oil-and-gas-agent-dev.pathfinder.gov.bc.ca"
     },
     {
       "name": "APPLICATION_URL",
