@@ -3,7 +3,7 @@
 # Component: .
 # Template File: templates/wallet-db/wallet-db-deploy.json
 #=========================================================
-NAME=wallet-db
+NAME=bc-oil-and-gas-wallet
 APP_GROUP=bc-oil-and-gas
 IMAGE_NAMESPACE=devex-von-permitify-tools
 SOURCE_IMAGE_NAME=postgresql

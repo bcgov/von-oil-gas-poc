@@ -16,7 +16,7 @@
         "name": "${NAME}",
         "generation": 1,
         "labels": {
-          "app": "services",
+          "app": "${APP_NAME}",
           "name": "${NAME}",
           "app-group": "${APP_GROUP}"
         }
@@ -175,7 +175,7 @@
       "metadata": {
         "name": "${NAME}",
         "labels": {
-          "app": "services",
+          "app": "${APP_NAME}",
           "name": "${NAME}",
           "app-group": "${APP_GROUP}"
         }
@@ -196,7 +196,7 @@
       "metadata": {
         "name": "${NAME}",
         "labels": {
-          "app": "services",
+          "app": "${APP_NAME}",
           "name": "${NAME}",
           "app-group": "${APP_GROUP}"
         }
@@ -214,7 +214,7 @@
       "metadata": {
         "name": "${NAME}",
         "labels": {
-          "app": "services",
+          "app": "${APP_NAME}",
           "name": "${NAME}",
           "app-group": "${APP_GROUP}"
         },
@@ -245,12 +245,19 @@
       "displayName": "Name",
       "description": "The name assigned to all of the OpenShift resources associated to the server instance.",
       "required": true,
-      "value": "wallet-db"
+      "value": "bc-oil-and-gas-wallet"
+    },
+    {
+      "name": "APP_NAME",
+      "displayName": "App Name",
+      "description": "The name assigned to all of the deployments in this project; used for grouping.",
+      "required": true,
+      "value": "bc-oil-and-gas-agent"
     },
     {
       "name": "APP_GROUP",
       "displayName": "App Group",
-      "description": "The name assigned to all of the deployments in this project.",
+      "description": "The group name assigned to all of the deployments in this project; used for grouping",
       "required": true,
       "value": "bc-oil-and-gas"
     },
@@ -259,7 +266,7 @@
       "displayName": "Image Namespace",
       "required": true,
       "description": "The namespace of the OpenShift project containing the imagestream for the application.",
-      "value": "devex-von-permitify-tools"
+      "value": "devex-von-permitify-dev"
     },
     {
       "name": "SOURCE_IMAGE_NAME",
