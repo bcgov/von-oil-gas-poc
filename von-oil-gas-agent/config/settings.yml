@@ -5,7 +5,7 @@ default:
   TOB_API_URL: http://tob-api:8080/api/v2
   TOB_APP_URL: http://localhost:8080
 
-  WALLET_SEED_VONX: oil-gas-commission_0000000000000
+  INDY_WALLET_SEED: oil-gas-commission_0000000000000
 
   #INDY_GENESIS_URL: http://localhost:9000/genesis
 

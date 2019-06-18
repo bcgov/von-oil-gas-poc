@@ -108,6 +108,9 @@ _walletPrefix="BCREG"
 readParameter "INDY_WALLET_SEED - Please provide the indy wallet seed for the environment.  If left blank, a seed will be randomly generated using openssl:" INDY_WALLET_SEED $(generateSeed ${_walletPrefix}) "true"
 readParameter "INDY_WALLET_DID - Please provide the indy wallet did for the environment.  The default is an empty string:" INDY_WALLET_DID "" "true"
 
+readParameter "TOB_WALLET_SEED - Please provide the TOB wallet seed for the environment.  If left blank, a seed will be randomly generated using openssl:" TOB_WALLET_SEED $(generateSeed ${_walletPrefix}) "true"
+readParameter "TOB_DID - Please provide the TOB wallet did for the environment.  The default is an empty string:" TOB_DID "" "true"
+
 SPECIALDEPLOYPARMS="--param-file=${_overrideParamFile}"
 echo ${SPECIALDEPLOYPARMS}
 # ================================================================================================================

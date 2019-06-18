@@ -195,8 +195,8 @@ issuers:
 
     wallet:
       name: ${POSTGRESQL_WALLET_NAME:-myorg_issuer}
-      seed: $WALLET_SEED_VONX
-      type: $WALLET_TYPE
+      seed: $INDY_WALLET_SEED
+      type: $INDY_WALLET_TYPE
       params:
         storage_config:
           url: "$POSTGRESQL_WALLET_HOST:$POSTGRESQL_WALLET_PORT"

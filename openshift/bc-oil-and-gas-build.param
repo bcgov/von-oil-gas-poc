@@ -6,6 +6,6 @@
 NAME=bc-oil-and-gas
 GIT_REPO_URL=https://github.com/bcgov/von-oil-gas-poc.git
 GIT_REF=master
-SOURCE_CONTEXT_DIR=
+SOURCE_CONTEXT_DIR=von-oil-gas-agent
 OUTPUT_IMAGE_TAG=latest
-DOCKER_FILE_PATH=von-oil-gas-agent/Dockerfile
+DOCKER_FILE_PATH=Dockerfile
