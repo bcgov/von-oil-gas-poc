@@ -50,6 +50,10 @@ issuers:
           type:
             input: registration
             from: value
+        cardinality_fields:
+          - registration_id
+          - wa_number
+          - formation_code
         mapping:
           - model: attribute
             fields:
