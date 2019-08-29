@@ -14,38 +14,65 @@ forms:
       id: bcreg_registration
       connection_id: bctob
     fields:
-    - name: registration_id
-      label: registration_id
-      type: text
-      required: true
-    - name: expiry_date
-      label: expiry_date
-      type: date
-      required: false
-    - name: wa_number
-      label: wa_number
-      type: text
-      required: true
-    - name: effective_date
-      label: effective_date
-      type: date
-      required: true
-    - name: well_name
-      label: well_name
-      type: text
-      required: true
-    - name: issued_date
-      label: issued_date
-      type: date
-      required: true
-    - name: well_status
-      label: well_status
-      type: select
-      options:
-      - todo-1
-      - todo-2
-      - todo-3
-      required: true
+      - name: registration_id
+        label: registration_id
+        type: text
+        required: true
+      - name: expiry_date
+        label: expiry_date
+        type: date
+        required: false
+      - name: wa_number
+        label: wa_number
+        type: text
+        required: true
+      - name: effective_date
+        label: effective_date
+        type: date
+        required: true
+      - name: well_name
+        label: well_name
+        type: text
+        required: true
+      - name: issued_date
+        label: issued_date
+        type: date
+        required: true
+      - name: well_status
+        label: well_status
+        type: select
+        options:
+          - todo-1
+          - todo-2
+          - todo-3
+        required: true
+      - name: approval_date
+        label: approval_date
+        type: date
+      - name: current_fluid_type
+        label: current_fluid_type
+        type: text
+      - name: formation_description
+        label: formation_description
+        type: text
+      - name: formation_code
+        label: formation_code
+        type: text
+      - name: ground_elevation
+        label: ground_elevation
+        type: text
+      - name: land_type
+        label: land_type
+        type: text
+      - name: geo_latitude
+        label: geo_latitude
+        type: text
+      - name: geo_longitude
+        label: geo_longitude
+        type: text
+      - name: well_class
+        label: well_class
+        type: text
     mapping:
       attributes: []
   oil-gas-commissionfacility-permit:
@@ -61,40 +88,38 @@ forms:
       id: bcreg_registration
       connection_id: bctob
     fields:
-    - name: registration_id
-      label: registration_id
-      type: text
-      required: true
-    - name: facility_id
-      label: facility_id
-      type: text
-      required: true
-    - name: expiry_date
-      label: expiry_date
-      type: date
-      required: false
-    - name: facility_status
-      label: facility_status
-      type: select
-      options:
-      - todo-1
-      - todo-2
-      - todo-3
-      required: true
-    - name: effective_date
-      label: effective_date
-      type: date
-      required: true
-    - name: facility_name
-      label: facility_name
-      type: text
-      required: true
-    - name: issued_date
-      label: issued_date
-      type: date
-      required: true
+      - name: registration_id
+        label: registration_id
+        type: text
+        required: true
+      - name: facility_id
+        label: facility_id
+        type: text
+        required: true
+      - name: expiry_date
+        label: expiry_date
+        type: date
+        required: false
+      - name: facility_status
+        label: facility_status
+        type: select
+        options:
+          - todo-1
+          - todo-2
+          - todo-3
+        required: true
+      - name: effective_date
+        label: effective_date
+        type: date
+        required: true
+      - name: facility_name
+        label: facility_name
+        type: text
+        required: true
+      - name: issued_date
+        label: issued_date
+        type: date
+        required: true
     mapping:
       attributes: []
-
-
 ### eof ###
