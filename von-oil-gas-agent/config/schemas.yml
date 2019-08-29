@@ -1,7 +1,7 @@
 # Documentation: https://github.com/bcgov/von-agent-template/tree/master/von-x-agent/config
 
 - name: well-permit.oil-gas-commission
-  version: 1.0.0
+  version: 1.1.0
   description: The well-permit credential issued by Oil and Gas Commission
   attributes:
     registration_id:
@@ -31,6 +31,42 @@
     well_status:
       description: Well Status
       data_type: ui_select
+      required: true
+    approval_date:
+      description: Approval Date
+      data_type: ui_date
+      required: true
+    current_fluid_type:
+      description: Current Fluid Type
+      data_type: ui_text
+      required: true
+    formation_description:
+      description: Formation Description
+      data_type: ui_text
+      required: true
+    formation_code:
+      description: Formation Code
+      data_type: ui_text
+      required: true
+    ground_elevation:
+      description: Ground Elevation
+      data_type: ui_text
+      required: true
+    land_type:
+      description: Land Type
+      data_type: ui_text
+      required: true
+    geo_latitude:
+      description: Geographical Latitude
+      data_type: ui_text
+      required: true
+    geo_longitude:
+      description: Geographical Longitude
+      data_type: ui_text
+      required: true
+    well_class:
+      description: Well Class
+      data_type: ui_text
       required: true
 - name: facility-permit.oil-gas-commission
   version: 1.0.0
@@ -64,6 +100,5 @@
       description: Issued Date
       data_type: ui_date
       required: true
-
 ### eof ###
 

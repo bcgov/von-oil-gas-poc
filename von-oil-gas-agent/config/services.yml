@@ -31,176 +31,251 @@ issuers:
         key_derivation_method: ARGON2I_MOD
 
     credential_types:
-    - description: The well-permit credential issued by Oil and Gas Commission
-      schema: well-permit.oil-gas-commission
-      issuer_url: $ENDPOINT_URL/oil-gas-commission/well-permit
-      depends_on:
-      - bcreg_registration
-      credential:
-        effective_date:
-          input: effective_date
-          from: claim
-        revoked_date:
-          input: expiry_date
-          from: claim
-      topic:
-        source_id:
-          input: registration_id
-          from: claim
-        type:
-          input: registration
-          from: value
-      mapping:
-      - model: attribute
-        fields:
-          type:
-            input: registration_id
-            from: value
-          value:
-            input: registration_id
-            from: claim
-      - model: attribute
-        fields:
-          type:
-            input: expiry_date
-            from: value
-          format:
-            input: datetime
-            from: value
-          value:
-            input: expiry_date
-            from: claim
-      - model: attribute
-        fields:
-          type:
-            input: wa_number
-            from: value
-          value:
-            input: wa_number
-            from: claim
-      - model: attribute
-        fields:
-          type:
-            input: effective_date
-            from: value
-          format:
-            input: datetime
-            from: value
-          value:
+      - description: The well-permit credential issued by Oil and Gas Commission
+        schema: well-permit.oil-gas-commission
+        issuer_url: $ENDPOINT_URL/oil-gas-commission/well-permit
+        depends_on:
+          - bcreg_registration
+        credential:
+          effective_date:
             input: effective_date
             from: claim
-      - model: attribute
-        fields:
-          type:
-            input: well_name
-            from: value
-          value:
-            input: well_name
-            from: claim
-      - model: attribute
-        fields:
-          type:
-            input: issued_date
-            from: value
-          format:
-            input: datetime
-            from: value
-          value:
-            input: issued_date
-            from: claim
-      - model: attribute
-        fields:
-          type:
-            input: well_status
-            from: value
-          value:
-            input: well_status
-            from: claim
-    - description: The facility-permit credential issued by Oil and Gas Commission
-      schema: facility-permit.oil-gas-commission
-      issuer_url: $ENDPOINT_URL/oil-gas-commission/facility-permit
-      depends_on:
-      - bcreg_registration
-      credential:
-        effective_date:
-          input: effective_date
-          from: claim
-        revoked_date:
-          input: expiry_date
-          from: claim
-      topic:
-        source_id:
-          input: registration_id
-          from: claim
-        type:
-          input: registration
-          from: value
-      mapping:
-      - model: attribute
-        fields:
-          type:
-            input: registration_id
-            from: value
-          value:
-            input: registration_id
-            from: claim
-      - model: attribute
-        fields:
-          type:
-            input: facility_id
-            from: value
-          value:
-            input: facility_id
-            from: claim
-      - model: attribute
-        fields:
-          type:
-            input: expiry_date
-            from: value
-          format:
-            input: datetime
-            from: value
-          value:
+          revoked_date:
             input: expiry_date
             from: claim
-      - model: attribute
-        fields:
-          type:
-            input: facility_status
-            from: value
-          value:
-            input: facility_status
+        topic:
+          source_id:
+            input: registration_id
             from: claim
-      - model: attribute
-        fields:
           type:
+            input: registration
+            from: value
+        mapping:
+          - model: attribute
+            fields:
+              type:
+                input: registration_id
+                from: value
+              value:
+                input: registration_id
+                from: claim
+          - model: attribute
+            fields:
+              type:
+                input: expiry_date
+                from: value
+              format:
+                input: datetime
+                from: value
+              value:
+                input: expiry_date
+                from: claim
+          - model: attribute
+            fields:
+              type:
+                input: wa_number
+                from: value
+              value:
+                input: wa_number
+                from: claim
+          - model: attribute
+            fields:
+              type:
+                input: effective_date
+                from: value
+              format:
+                input: datetime
+                from: value
+              value:
+                input: effective_date
+                from: claim
+          - model: attribute
+            fields:
+              type:
+                input: well_name
+                from: value
+              value:
+                input: well_name
+                from: claim
+          - model: attribute
+            fields:
+              type:
+                input: issued_date
+                from: value
+              format:
+                input: datetime
+                from: value
+              value:
+                input: issued_date
+                from: claim
+          - model: attribute
+            fields:
+              type:
+                input: well_status
+                from: value
+              value:
+                input: well_status
+                from: claim
+          - model: attribute
+            fields:
+              type:
+                input: approval_date
+                from: value
+              format:
+                input: datetime
+                from: value
+              value:
+                input: approval_date
+                from: claim
+          - model: attribute
+            fields:
+              type:
+                input: current_fluid_type
+                from: value
+              value:
+                input: current_fluid_type
+                from: claim
+          - model: attribute
+            fields:
+              type:
+                input: formation_description
+                from: value
+              value:
+                input: formation_description
+                from: claim
+          - model: attribute
+            fields:
+              type:
+                input: formation_code
+                from: value
+              value:
+                input: formation_code
+                from: claim
+          - model: attribute
+            fields:
+              type:
+                input: ground_elevation
+                from: value
+              value:
+                input: ground_elevation
+                from: claim
+          - model: attribute
+            fields:
+              type:
+                input: land_type
+                from: value
+              value:
+                input: land_type
+                from: claim
+          - model: attribute
+            fields:
+              type:
+                input: geo_latitude
+                from: value
+              value:
+                input: geo_latitude
+                from: claim
+          - model: attribute
+            fields:
+              type:
+                input: geo_longitude
+                from: value
+              value:
+                input: geo_longitude
+                from: claim
+          - model: attribute
+            fields:
+              type:
+                input: well_class
+                from: value
+              value:
+                input: well_class
+                from: claim
+      - description: The facility-permit credential issued by Oil and Gas Commission
+        schema: facility-permit.oil-gas-commission
+        issuer_url: $ENDPOINT_URL/oil-gas-commission/facility-permit
+        depends_on:
+          - bcreg_registration
+        credential:
+          effective_date:
             input: effective_date
-            from: value
-          format:
-            input: datetime
-            from: value
-          value:
-            input: effective_date
             from: claim
-      - model: attribute
-        fields:
+          revoked_date:
+            input: expiry_date
+            from: claim
+        topic:
+          source_id:
+            input: registration_id
+            from: claim
           type:
-            input: facility_name
+            input: registration
             from: value
-          value:
-            input: facility_name
-            from: claim
-      - model: attribute
-        fields:
-          type:
-            input: issued_date
-            from: value
-          format:
-            input: datetime
-            from: value
-          value:
-            input: issued_date
-            from: claim
+        mapping:
+          - model: attribute
+            fields:
+              type:
+                input: registration_id
+                from: value
+              value:
+                input: registration_id
+                from: claim
+          - model: attribute
+            fields:
+              type:
+                input: facility_id
+                from: value
+              value:
+                input: facility_id
+                from: claim
+          - model: attribute
+            fields:
+              type:
+                input: expiry_date
+                from: value
+              format:
+                input: datetime
+                from: value
+              value:
+                input: expiry_date
+                from: claim
+          - model: attribute
+            fields:
+              type:
+                input: facility_status
+                from: value
+              value:
+                input: facility_status
+                from: claim
+          - model: attribute
+            fields:
+              type:
+                input: effective_date
+                from: value
+              format:
+                input: datetime
+                from: value
+              value:
+                input: effective_date
+                from: claim
+          - model: attribute
+            fields:
+              type:
+                input: facility_name
+                from: value
+              value:
+                input: facility_name
+                from: claim
+          - model: attribute
+            fields:
+              type:
+                input: issued_date
+                from: value
+              format:
+                input: datetime
+                from: value
+              value:
+                input: issued_date
+                from: claim
 
 verifiers:
   bctob:
@@ -213,14 +288,12 @@ verifiers:
 
 proof_requests:
   bcreg_registration:
-    version: '1.0.0'
+    version: "1.0.0"
     schemas:
       - key:
           did: ${TOB_DID:-G3NAEYfm17qsEd9iRLK3wZ}
           name: registration.registries.ca
-          version: '1.0.42'
+          version: "1.0.42"
         attributes:
           - registration_id
-
-
 ### eof ###
