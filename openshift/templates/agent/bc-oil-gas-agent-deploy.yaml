@@ -254,7 +254,7 @@ parameters:
     displayName: App Group
     description: Used to group components together.
     required: true
-    value: bc-oil-and-gas-agent
+    value: bc-oil-and-gas
   - name: APPLICATION_DOMAIN
     displayName: Application Hostname
     description: The exposed hostname that will route to the service, if left blank a value will be defaulted.
@@ -329,7 +329,7 @@ parameters:
     displayName: PostgreSql Wallet Hostname
     required: true
     description: Hostname of the deployed database hosting the wallet.  Only used when WALLET_STORAGE_TYPE = postgres_storage.
-    value: wallet
+    value: bc-oil-and-gas-wallet
   - name: WALLET_HOST_PORT
     displayName: PostgreSql Wallet Port
     required: true
@@ -351,7 +351,7 @@ parameters:
       The name of the wallet credential store (aka The name of the secret
       that contains the wallet credentials).
     required: true
-    value: agent-wallet-credentials
+    value: bc-oil-and-gas-agent-wallet-credentials
   - name: WALLET_KEY
     displayName: Wallet Encryption Key
     description: The encryption key to be used for the wallets.  Needs to be basee64 encoded.

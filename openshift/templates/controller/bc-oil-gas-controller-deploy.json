@@ -234,7 +234,7 @@
       "displayName": "App Group",
       "description": "The name assigned to all of the deployments in this project.",
       "required": true,
-      "value": "bc-oil-and-gas-controller"
+      "value": "bc-oil-and-gas"
     },
     {
       "name": "IMAGE_NAMESPACE",
@@ -276,7 +276,7 @@
       "displayName": "Agent Service name",
       "description": "Agent service name",
       "required": true,
-      "value": "agent"
+      "value": "bc-oil-gas-agent"
     },
     {
       "name": "AGENT_ADMIN_PORT",

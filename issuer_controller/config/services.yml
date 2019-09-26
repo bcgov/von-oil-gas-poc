@@ -284,11 +284,10 @@ issuers:
 verifiers:
   bctob:
     name: BC OrgBook
+    alias: tob-agent
     connection:
       type: TheOrgBook
-      api_url: $TOB_API_URL
-    wallet:
-      seed: ${TOB_WALLET_SEED:-tob-verifier-wallet-000000000001}
+      agent_admin_url: $TOB_AGENT_ADMIN_URL
 
 proof_requests:
   bcreg_registration:
