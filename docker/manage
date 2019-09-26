@@ -1,19 +1,4 @@
 #!/bin/bash
-#
-# Copyright 2017-2018 Government of Canada - Public Services and Procurement Canada - buyandsell.gc.ca
-#
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-# http://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
-#
 
 export DOCKERHOST=${APPLICATION_URL-$(docker run --rm --net=host codenvy/che-ip)}
 export MSYS_NO_PATHCONV=1
@@ -88,16 +73,45 @@ configureEnvironment () {
   export APPLICATION_URL=${APPLICATION_URL-http://localhost:${WEB_HTTP_PORT:-5001}}
   export ENDPOINT_URL=http://${ENDPOINT_HOST-$DOCKERHOST:${WEB_HTTP_PORT:-5001}}
 
+  # myorg-agent
+  export AGENT_ADMIN_PORT=8034
+  export TOB_AGENT_ADMIN_PORT=8024
+  export WEBHOOK_PORT=5000
+  #export INDY_WALLET_DID=...
+  export AGENT_HTTP_IN_PORT=8031
+  export AGENT_WS_IN_PORT=8033
+  export WEBHOOK_HOST=http://myorg-controller:${WEBHOOK_PORT}
+  export AGENT_NAME="myorg-agent"
+  export AGENT_ENDPOINT=${AGENT_ENDPOINT:-http://$DOCKERHOST:$AGENT_HTTP_IN_PORT}
+  export AGENT_ADMIN_API_KEY=${AGENT_ADMIN_API_KEY}
+  export AGENT_ADMIN_MODE="admin-insecure-mode"
+  if [ ! -z "${AGENT_ADMIN_API_KEY}" ]; then
+    AGENT_ADMIN_MODE="admin-api-key ${AGENT_ADMIN_API_KEY}"
+  fi
+
   # wallet-db
   export POSTGRESQL_DATABASE="THE_ORG_BOOK"
   export POSTGRESQL_USER="DB_USER"
   export POSTGRESQL_PASSWORD="DB_PASSWORD"
-  export INDY_WALLET_TYPE="postgres_storage"
+  export WALLET_TYPE="postgres_storage"
   export WALLET_ENCRYPTION_KEY="key"
   export POSTGRESQL_WALLET_HOST="myorg-wallet-db"
   export POSTGRESQL_WALLET_PORT="5432"
   export POSTGRESQL_ADMIN_USER="postgres"
   export POSTGRESQL_ADMIN_PASSWORD="mysecretpassword"
+  export WALLET_SEED_VONX="myorg_issuer_0000000000000000001"
+
+  # myorg-pipeline
+  export COMPOSE_PROJECT_NAME=${COMPOSE_PROJECT_NAME:-"vonx"}
+  export LEDGER_URL=${LEDGER_URL-http://$DOCKERHOST:9000}
+  export APPLICATION_URL=${APPLICATION_URL-http://localhost:${WEB_HTTP_PORT:-5000}}
+  export ENDPOINT_URL=http://${ENDPOINT_HOST-$DOCKERHOST:${WEB_HTTP_PORT:-5001}}
+  export VONX_API_URL=http://myorg-controller:${WEBHOOK_PORT}
+
+  # myorg-controller
+  export TOB_AGENT_ADMIN_URL=${TOB_AGENT_ADMIN_URL:-http://tob-agent:${TOB_AGENT_ADMIN_PORT}} 
+  export TOB_CONNECTION_NAME=${TOB_CONNECTION_NAME:-tob-agent} 
+  export TOB_ADMIN_API_KEY=${TOB_ADMIN_API_KEY}
 }
 
 getStartupParams() {
