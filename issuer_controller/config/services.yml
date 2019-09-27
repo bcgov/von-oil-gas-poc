@@ -32,7 +32,7 @@ issuers:
             input: registration_id
             from: claim
           type:
-            input: registration
+            input: registration.registries.ca
             from: value
         cardinality_fields:
           - registration_id
@@ -197,7 +197,7 @@ issuers:
             input: registration_id
             from: claim
           type:
-            input: registration
+            input: registration.registries.ca
             from: value
         mapping:
           - model: attribute
