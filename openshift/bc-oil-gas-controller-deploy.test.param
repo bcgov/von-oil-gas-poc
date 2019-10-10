@@ -1,0 +1,21 @@
+#=========================================================
+# OpenShift template parameters for:
+# Component: .
+# Template File: templates/controller/bc-oil-gas-controller-deploy.json
+#=========================================================
+# NAME=bc-oil-gas-controller
+# APP_NAME=bc-oil-and-gas-agent
+# APP_GROUP=bc-oil-and-gas
+# IMAGE_NAMESPACE=devex-von-permitify-tools
+TAG_NAME=test
+# CONFIG_ROOT=../config
+# HOST_PORT=8080
+# ENVIRONMENT=default
+# AGENT_SERVICE_NAME=bc-oil-gas-agent
+# AGENT_ADMIN_PORT=8024
+# CR_AGENT_ADMIN_URL=
+# CR_ADMIN_API_KEY=
+# CPU_REQUEST=10m
+# CPU_LIMIT=1000m
+# MEMORY_REQUEST=10Mi
+# MEMORY_LIMIT=2000Mi

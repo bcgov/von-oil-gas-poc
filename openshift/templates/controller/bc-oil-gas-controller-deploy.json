@@ -1,0 +1,311 @@
+{
+  "kind": "Template",
+  "apiVersion": "v1",
+  "metadata": {
+    "name": "${NAME}-deployment-template",
+    "annotations": {
+      "description": "Deployment template for a ${NAME} instance."
+    }
+  },
+  "objects": [
+    {
+      "kind": "Secret",
+      "apiVersion": "v1",
+      "metadata": {
+        "name": "${NAME}",
+        "labels": {
+          "name": "${NAME}",
+          "app": "${APP_NAME}",
+          "app-group": "${APP_GROUP}"
+        }
+      },
+      "stringData": {
+        "cr-agent-admin-api-url": "${CR_AGENT_ADMIN_URL}",
+        "cr-agent-admin-api-key": "${CR_ADMIN_API_KEY}"
+      },
+      "type": "Opaque"
+    },
+    {
+      "kind": "Service",
+      "apiVersion": "v1",
+      "metadata": {
+        "name": "${NAME}",
+        "labels": {
+          "name": "${NAME}",
+          "app": "${APP_NAME}",
+          "app-group": "${APP_GROUP}"
+        }
+      },
+      "spec": {
+        "ports": [
+          {
+            "name": "${NAME}-http",
+            "protocol": "TCP",
+            "port": "${{HOST_PORT}}",
+            "targetPort": "${{HOST_PORT}}"
+          }
+        ],
+        "selector": {
+          "name": "${NAME}"
+        }
+      }
+    },
+    {
+      "kind": "DeploymentConfig",
+      "apiVersion": "v1",
+      "metadata": {
+        "name": "${NAME}",
+        "labels": {
+          "name": "${NAME}",
+          "app": "${APP_NAME}",
+          "app-group": "${APP_GROUP}"
+        },
+        "annotations": {
+          "description": "Defines how to deploy the container."
+        }
+      },
+      "spec": {
+        "strategy": {
+          "type": "Rolling",
+          "rollingParams": {
+            "updatePeriodSeconds": 1,
+            "intervalSeconds": 1,
+            "timeoutSeconds": 600,
+            "maxUnavailable": "25%",
+            "maxSurge": "25%"
+          }
+        },
+        "triggers": [
+          {
+            "type": "ConfigChange"
+          },
+          {
+            "type": "ImageChange",
+            "imageChangeParams": {
+              "automatic": true,
+              "containerNames": ["${NAME}"],
+              "from": {
+                "kind": "ImageStreamTag",
+                "namespace": "${IMAGE_NAMESPACE}",
+                "name": "${NAME}:${TAG_NAME}"
+              }
+            }
+          }
+        ],
+        "replicas": 1,
+        "selector": {
+          "name": "${NAME}"
+        },
+        "template": {
+          "metadata": {
+            "name": "${NAME}",
+            "labels": {
+              "name": "${NAME}",
+              "app": "${APP_NAME}",
+              "app-group": "${APP_GROUP}"
+            }
+          },
+          "spec": {
+            "containers": [
+              {
+                "name": "${NAME}",
+                "image": " ",
+                "ports": [
+                  {
+                    "containerPort": "${{HOST_PORT}}",
+                    "protocol": "TCP"
+                  }
+                ],
+                "env": [
+                  {
+                    "name": "CONFIG_ROOT",
+                    "value": "${CONFIG_ROOT}"
+                  },
+                  {
+                    "name": "HOST_PORT",
+                    "value": "${HOST_PORT}"
+                  },
+                  {
+                    "name": "ENVIRONMENT",
+                    "value": "${ENVIRONMENT}"
+                  },
+                  {
+                    "name": "AGENT_ADMIN_URL",
+                    "value": "http://${AGENT_SERVICE_NAME}:${AGENT_ADMIN_PORT}"
+                  },
+                  {
+                    "name": "AGENT_ADMIN_API_KEY",
+                    "valueFrom": {
+                      "secretKeyRef": {
+                        "name": "${AGENT_SERVICE_NAME}",
+                        "key": "admin-api-key"
+                      }
+                    }
+                  },
+                  {
+                    "name": "TOB_AGENT_ADMIN_URL",
+                    "valueFrom": {
+                      "secretKeyRef": {
+                        "name": "${NAME}",
+                        "key": "cr-agent-admin-api-url"
+                      }
+                    }
+                  },
+                  {
+                    "name": "TOB_ADMIN_API_KEY",
+                    "valueFrom": {
+                      "secretKeyRef": {
+                        "name": "${NAME}",
+                        "key": "cr-agent-admin-api-key"
+                      }
+                    }
+                  }
+                ],
+                "readinessProbe": {
+                  "timeoutSeconds": 30,
+                  "initialDelaySeconds": 3,
+                  "httpGet": {
+                    "path": "/health",
+                    "port": "${{HOST_PORT}}"
+                  }
+                },
+                "livenessProbe": {
+                  "timeoutSeconds": 30,
+                  "initialDelaySeconds": 300,
+                  "httpGet": {
+                    "path": "/health",
+                    "port": "${{HOST_PORT}}"
+                  }
+                },
+                "resources": {
+                  "requests": {
+                    "cpu": "${CPU_REQUEST}",
+                    "memory": "${MEMORY_REQUEST}"
+                  },
+                  "limits": {
+                    "cpu": "${CPU_LIMIT}",
+                    "memory": "${MEMORY_LIMIT}"
+                  }
+                }
+              }
+            ]
+          }
+        }
+      }
+    }
+  ],
+  "parameters": [
+    {
+      "name": "NAME",
+      "displayName": "Name",
+      "description": "The name assigned to all of the objects defined in this template.",
+      "required": true,
+      "value": "bc-oil-and-gas-controller"
+    },
+    {
+      "name": "APP_NAME",
+      "displayName": "App Name",
+      "description": "Used to group components together in the OpenShift console.",
+      "required": true,
+      "value": "bc-oil-and-gas-agent"
+    },
+    {
+      "name": "APP_GROUP",
+      "displayName": "App Group",
+      "description": "The name assigned to all of the deployments in this project.",
+      "required": true,
+      "value": "bc-oil-and-gas"
+    },
+    {
+      "name": "IMAGE_NAMESPACE",
+      "displayName": "Image Namespace",
+      "required": true,
+      "description": "The namespace of the OpenShift project containing the imagestream for the application.",
+      "value": "devex-von-permitify-tools"
+    },
+    {
+      "name": "TAG_NAME",
+      "displayName": "Environment TAG name",
+      "description": "The TAG name for this environment, e.g., dev, test, prod",
+      "required": true,
+      "value": "dev"
+    },
+    {
+      "name": "CONFIG_ROOT",
+      "displayName": "Config Root",
+      "description": "The root directory containing the application configuration.",
+      "required": true,
+      "value": "../config"
+    },
+    {
+      "name": "HOST_PORT",
+      "displayName": "Host Port",
+      "description": "The port on which the agent service will listen.",
+      "required": true,
+      "value": "8080"
+    },
+    {
+      "name": "ENVIRONMENT",
+      "displayName": "Environment",
+      "description": "The application environment.",
+      "required": true,
+      "value": "default"
+    },
+    {
+      "name": "AGENT_SERVICE_NAME",
+      "displayName": "Agent Service name",
+      "description": "Agent service name",
+      "required": true,
+      "value": "bc-oil-gas-agent"
+    },
+    {
+      "name": "AGENT_ADMIN_PORT",
+      "displayName": "Agent Admin Port",
+      "description": "Agent admin port",
+      "required": true,
+      "value": "8024"
+    },
+    {
+      "name": "CR_AGENT_ADMIN_URL",
+      "displayName": "Credential Registry Admin API Url",
+      "description": "Credential registry admin api url",
+      "required": true,
+      "value": ""
+    },
+    {
+      "name": "CR_ADMIN_API_KEY",
+      "displayName": "Credential Registry Admin API Key",
+      "description": "Credential registry admin api key",
+      "required": true,
+      "value": ""
+    },
+    {
+      "name": "CPU_REQUEST",
+      "displayName": "Resources CPU Request",
+      "description": "The resources CPU request (in cores) for this build.",
+      "required": true,
+      "value": "10m"
+    },
+    {
+      "name": "CPU_LIMIT",
+      "displayName": "Resources CPU Limit",
+      "description": "The resources CPU limit (in cores) for this build.",
+      "required": true,
+      "value": "1000m"
+    },
+    {
+      "name": "MEMORY_REQUEST",
+      "displayName": "Resources Memory Request",
+      "description": "The resources Memory request (in Mi, Gi, etc) for this build.",
+      "required": true,
+      "value": "10Mi"
+    },
+    {
+      "name": "MEMORY_LIMIT",
+      "displayName": "Resources Memory Limit",
+      "description": "The resources Memory limit (in Mi, Gi, etc) for this build.",
+      "required": true,
+      "value": "2000Mi"
+    }
+  ]
+}

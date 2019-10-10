@@ -1,0 +1,17 @@
+#=========================================================
+# OpenShift template parameters for:
+# Component: .
+# Template File: templates/controller/bc-oil-gas-controller-build.json
+#=========================================================
+NAME=bc-oil-gas-controller
+APP_NAME=bc-oil-and-gas-controller
+APP_GROUP=bc-oil-and-gas-agent
+GIT_REPO_URL=https://github.com/bcgov/von-oil-gas-poc.git
+GIT_REF=master
+SOURCE_CONTEXT_DIR=issuer_controller
+OUTPUT_IMAGE_TAG=latest
+DOCKER_FILE_PATH=Dockerfile
+CPU_LIMIT=0
+MEMORY_LIMIT=0Mi
+CPU_REQUEST=0
+MEMORY_REQUEST=0Mi
