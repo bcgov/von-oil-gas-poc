@@ -32,20 +32,22 @@ The agent will automatically create and activate the connection with OrgBook, pr
   "proof_request": {
     "version": "1.0",
     "name": "proof-request",
-    "requested_predicates": {},
-    "requested_attributes": {
-      "requestedAttr1": {
-        "name": "corp_num",
-        "restrictions": [
-          {
-            "issuer_did": "52Po5igEeRhtGHVs8Qmhow",
-            "schema_version": "1.0.0",
-            "schema_name": "my-registration.emiliano-garage",
-            "attr::corp_num::value": "ABC12345"
-          }
-        ]
+    "requested_predicates": [{}],
+    "requested_attributes": [
+      {
+        "requestedAttr1": {
+          "name": "corp_num",
+          "restrictions": [
+            {
+              "issuer_did": "52Po5igEeRhtGHVs8Qmhow",
+              "schema_version": "1.0.0",
+              "schema_name": "my-registration.emiliano-garage",
+              "attr::corp_num::value": "ABC12345"
+            }
+          ]
+        }
       }
-    }
+    ]
   }
 }
 ```
