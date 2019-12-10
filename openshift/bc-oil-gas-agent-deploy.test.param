@@ -6,17 +6,17 @@
 # NAME=bc-oil-gas-agent
 # APP_NAME=bc-oil-and-gas-agent
 # APP_GROUP=bc-oil-and-gas
-APPLICATION_DOMAIN=bc-oil-gas-agent-devex-von-permitify-test.pathfinder.gov.bc.ca
+APPLICATION_DOMAIN=bc-oil-gas-agent-test.pathfinder.gov.bc.ca
 # IMAGE_NAMESPACE=devex-von-permitify-tools
 TAG_NAME=test
 # AGENT_LABEL_NAME=bc-oil-and-gas
-# AGENT_BASE_URL=https://bc-oil-and-gas-agent-dev.pathfinder.gov.bc.ca
-# WEBHOOK_URL=http://bc-oil-and-gas-controller:8080/api/agentcb
+AGENT_BASE_URL=https://bc-oil-gas-agent-test.pathfinder.gov.bc.ca
+# WEBHOOK_URL=http://bc-oil-gas-controller:8080/api/agentcb
 # AGENT_ADMIN_PORT=8024
 # ADMIN_API_KEY=[a-zA-Z0-9_~!@#$%^&*()-=<>,.?;:|]{16}
 # AGENT_HTTP_PORT=8021
 # AGENT_WS_PORT=8023
-# GENESIS_FILE_URL=http://dev.bcovrin.vonx.io/genesis
+GENESIS_FILE_URL=http://test.bcovrin.vonx.io/genesis
 # LOG_LEVEL=INFO
 # WALLET_STORAGE_TYPE=postgres_storage
 # WALLET_HOST=bc-oil-and-gas-wallet
