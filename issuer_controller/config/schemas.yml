@@ -1,7 +1,7 @@
 # Documentation: https://github.com/bcgov/von-agent-template/tree/master/von-x-agent/config
 
 - name: well-permit.oil-gas-commission
-  version: 1.1.7
+  version: 1.1.8
   description: The well-permit credential issued by Oil and Gas Commission
   topic: registration_id
   cardinality:
@@ -74,8 +74,11 @@
       data_type: ui_text
       required: true
 - name: facility-permit.oil-gas-commission
-  version: 1.1.7
+  version: 1.1.8
   description: The facility-permit credential issued by Oil and Gas Commission
+  cardinality:
+    - registration_id
+    - facility_id
   attributes:
     registration_id:
       description: ID issued by the registering organization

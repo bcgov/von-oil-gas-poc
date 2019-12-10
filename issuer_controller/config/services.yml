@@ -199,6 +199,9 @@ issuers:
           type:
             input: registration.registries.ca
             from: value
+        cardinality_fields:
+          - registration_id
+          - facility_id
         mapping:
           - model: attribute
             fields:
