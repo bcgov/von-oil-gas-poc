@@ -130,8 +130,7 @@ objects:
                   --label "${AGENT_NAME}"
                   --log-level ${AGENT_LOG_LEVEL}
                   $([[ ! -z "${TIMING}" ]] && echo "--timing" || echo "")
-                  --plugin indy_catalyst_issuer_registration)
-                  --debug-connections;
+                  --plugin indy_catalyst_issuer_registration);
               env:
                 - name: GENESIS_URL
                   value: ${GENESIS_FILE_URL}
