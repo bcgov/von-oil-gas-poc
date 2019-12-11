@@ -2,6 +2,7 @@ import json
 import os
 import threading
 import time
+from datetime import datetime
 
 import requests
 from flask import jsonify
@@ -25,6 +26,8 @@ synced = {}
 
 
 class StartupProcessingThread(threading.Thread):
+    global app_config
+
     def __init__(self, ENV):
         threading.Thread.__init__(self)
         self.ENV = ENV
@@ -188,6 +191,7 @@ class StartupProcessingThread(threading.Thread):
                 },
             }
 
+            print(json.dumps(issuer_request))
             response = requests.post(
                 agent_admin_url + "/issuer_registration/send",
                 json.dumps(issuer_request),
@@ -213,30 +217,105 @@ credential_requests = {}
 credential_responses = {}
 credential_threads = {}
 
+USE_LOCK = os.getenv('USE_LOCK', 'True').lower() == 'true'
+# need to specify an env variable RECORD_TIMINGS=True to get method timings
+RECORD_TIMINGS = os.getenv('RECORD_TIMINGS', 'False').lower() == 'true'
+
+timing_lock = threading.Lock()
+timings = {}
+
+def clear_stats():
+    global timings
+    timing_lock.acquire()
+    try:
+        timings = {}
+    finally:
+        timing_lock.release()
+
+def get_stats():
+    timing_lock.acquire()
+    try:
+        return timings
+    finally:
+        timing_lock.release()
+
+def log_timing_method(method, start_time, end_time, success, data=None):
+    if not RECORD_TIMINGS:
+        return
+
+    timing_lock.acquire()
+    try:
+        elapsed_time = end_time - start_time
+        if not method in timings:
+            timings[method] = {
+                'total_count': 1,
+                'success_count': 1 if success else 0,
+                'fail_count': 0 if success else 1,
+                'min_time': elapsed_time,
+                'max_time': elapsed_time,
+                'total_time': elapsed_time,
+                'avg_time': elapsed_time,
+                'data': {}
+            }
+        else:
+            timings[method]['total_count'] = timings[method]['total_count'] + 1
+            if success:
+                timings[method]['success_count'] = timings[method]['success_count'] + 1
+            else:
+                timings[method]['fail_count'] = timings[method]['fail_count'] + 1
+            if elapsed_time > timings[method]['max_time']:
+                timings[method]['max_time'] = elapsed_time
+            if elapsed_time < timings[method]['min_time']:
+                timings[method]['min_time'] = elapsed_time
+            timings[method]['total_time'] = timings[method]['total_time'] + elapsed_time
+            timings[method]['avg_time'] = timings[method]['total_time'] / timings[method]['total_count']
+        if data:
+            timings[method]['data'][str(timings[method]['total_count'])] = data
+    finally:
+        timing_lock.release()
+
 
 def set_credential_thread_id(cred_exch_id, thread_id):
-    credential_lock.acquire()
+    start_time = time.perf_counter()
+    if USE_LOCK:
+        credential_lock.acquire()
     try:
         # add 2 records so we can x-ref
-        print("Set cred_exch_id, thread_id", cred_exch_id, thread_id)
+        #print("Set cred_exch_id, thread_id", cred_exch_id, thread_id, len(credential_requests))
         credential_threads[thread_id] = cred_exch_id
         credential_threads[cred_exch_id] = thread_id
     finally:
-        credential_lock.release()
+        if USE_LOCK:
+            credential_lock.release()
+    processing_time = time.perf_counter() - start_time
+    if processing_time > 0.001:
+        print(">>> lock time =", processing_time)
 
 
 def add_credential_request(cred_exch_id):
-    credential_lock.acquire()
+    start_time = time.perf_counter()
+    if USE_LOCK:
+        credential_lock.acquire()
     try:
+        # short circuit if we already have the response
+        if cred_exch_id in credential_responses:
+            return None
+
         result_available = threading.Event()
         credential_requests[cred_exch_id] = result_available
         return result_available
     finally:
-        credential_lock.release()
+        if USE_LOCK:
+            credential_lock.release()
+    processing_time = time.perf_counter() - start_time
+    if processing_time > 0.001:
+        print(">>> lock time =", processing_time)
 
 
 def add_credential_response(cred_exch_id, response):
-    credential_lock.acquire()
+    start_time = time.perf_counter()
+    if USE_LOCK:
+        credential_lock.acquire()
     try:
         credential_responses[cred_exch_id] = response
         if cred_exch_id in credential_requests:
@@ -244,11 +323,15 @@ def add_credential_response(cred_exch_id, response):
             result_available.set()
             del credential_requests[cred_exch_id]
     finally:
-        credential_lock.release()
+        if USE_LOCK:
+            credential_lock.release()
+    processing_time = time.perf_counter() - start_time
+    if processing_time > 0.001:
+        print(">>> lock time =", processing_time)
 
 
 def add_credential_problem_report(thread_id, response):
-    print("get problem report for thread", thread_id)
+    print(datetime.now(), "get problem report for thread", thread_id, len(credential_requests))
     if thread_id in credential_threads:
         cred_exch_id = credential_threads[thread_id]
         add_credential_response(cred_exch_id, response)
@@ -276,24 +359,31 @@ def add_credential_exception_report(cred_exch_id, exc):
 
 
 def get_credential_response(cred_exch_id):
-    credential_lock.acquire()
+    start_time = time.perf_counter()
+    if USE_LOCK:
+        credential_lock.acquire()
     try:
         if cred_exch_id in credential_responses:
             response = credential_responses[cred_exch_id]
             del credential_responses[cred_exch_id]
             if cred_exch_id in credential_threads:
                 thread_id = credential_threads[cred_exch_id]
-                print("cleaning out cred_exch_id, thread_id", cred_exch_id, thread_id)
+                #print("cleaning out cred_exch_id, thread_id", cred_exch_id, thread_id)
                 del credential_threads[cred_exch_id]
                 del credential_threads[thread_id]
             return response
         else:
             return None
     finally:
-        credential_lock.release()
+        if USE_LOCK:
+            credential_lock.release()
+    processing_time = time.perf_counter() - start_time
+    if processing_time > 0.001:
+        print(">>> lock time =", processing_time)
 
 
 TOPIC_CONNECTIONS = "connections"
+TOPIC_CONNECTIONS_ACTIVITY = "connections_actvity"
 TOPIC_CREDENTIALS = "credentials"
 TOPIC_PRESENTATIONS = "presentations"
 TOPIC_GET_ACTIVE_MENU = "get-active-menu"
@@ -301,51 +391,56 @@ TOPIC_PERFORM_MENU_ACTION = "perform-menu-action"
 TOPIC_ISSUER_REGISTRATION = "issuer_registration"
 TOPIC_PROBLEM_REPORT = "problem-report"
 
-# max 15 second wait for a credential response (prevents blocking forever)
-MAX_CRED_RESPONSE_TIMEOUT = 15
-
+# seconds to wait for a credential response (prevents blocking forever)
+MAX_CRED_RESPONSE_TIMEOUT = int(os.getenv('MAX_CRED_RESPONSE_TIMEOUT', '90'))
 
 def handle_connections(state, message):
     # TODO auto-accept?
-    print("handle_connections()", state)
+    #print("handle_connections()", state)
     return jsonify({"message": state})
 
 
 def handle_credentials(state, message):
     # TODO auto-respond to proof requests
-    print("handle_credentials()", state, message["credential_exchange_id"])
-    # TODO new "stored" state is being added by Nick
     if "thread_id" in message:
+        #print(datetime.now(), ">>> handle_credentials()", state, message["credential_exchange_id"], "thread:", message["thread_id"])
         set_credential_thread_id(
             message["credential_exchange_id"], message["thread_id"]
         )
+    else:
+        #print(datetime.now(), ">>> handle_credentials()", state, message["credential_exchange_id"])
+        pass
     if state == "stored":
         response = {"success": True, "result": message["credential_exchange_id"]}
         add_credential_response(message["credential_exchange_id"], response)
+    #if "thread_id" in message:
+    #    print(datetime.now(), "<<< handle_credentials()", state, message["credential_exchange_id"], "thread:", message["thread_id"])
+    #else:
+    #    print(datetime.now(), "<<< handle_credentials()", state, message["credential_exchange_id"])
     return jsonify({"message": state})
 
 
 def handle_presentations(state, message):
     # TODO auto-respond to proof requests
-    print("handle_presentations()", state)
+    #print("handle_presentations()", state)
     return jsonify({"message": state})
 
 
 def handle_get_active_menu(message):
     # TODO add/update issuer info?
-    print("handle_get_active_menu()", message)
+    #print("handle_get_active_menu()", message)
     return jsonify({})
 
 
 def handle_perform_menu_action(message):
     # TODO add/update issuer info?
-    print("handle_perform_menu_action()", message)
+    #print("handle_perform_menu_action()", message)
     return jsonify({})
 
 
 def handle_register_issuer(message):
     # TODO add/update issuer info?
-    print("handle_register_issuer()")
+    #print("handle_register_issuer()")
     return jsonify({})
 
 
@@ -368,6 +463,9 @@ class SendCredentialThread(threading.Thread):
         self.headers = headers
 
     def run(self):
+        start_time = time.perf_counter()
+        method = 'submit_credential.credential'
+
         cred_data = None
         try:
             response = requests.post(
@@ -378,28 +476,69 @@ class SendCredentialThread(threading.Thread):
             result_available = add_credential_request(
                 cred_data["credential_exchange_id"]
             )
-            print(
-                "Sent offer",
-                cred_data["credential_exchange_id"],
-                cred_data["connection_id"],
-            )
+            #print(
+            #    "Sent credential offer",
+            #    cred_data["credential_exchange_id"],
+            #    cred_data["connection_id"],
+            #)
 
             # wait for confirmation from the agent, which will include the credential exchange id
-            if not result_available.wait(MAX_CRED_RESPONSE_TIMEOUT):
+            if result_available and not result_available.wait(MAX_CRED_RESPONSE_TIMEOUT):
                 add_credential_timeout_report(cred_data["credential_exchange_id"])
+                print(
+                    "Got credential TIMEOUT:",
+                    cred_data["thread_id"],
+                    cred_data["credential_exchange_id"],
+                    cred_data["connection_id"],
+                )
+                end_time = time.perf_counter()
+                log_timing_method(method, start_time, end_time, False, 
+                    data={
+                        'thread_id':cred_data["thread_id"], 
+                        'credential_exchange_id':cred_data["credential_exchange_id"], 
+                        'Error': 'Timeout',
+                        'elapsed_time': (end_time-start_time)
+                    }
+                )
+            else:
+                #print(
+                #    "Got credential response:",
+                #    cred_data["credential_exchange_id"],
+                #    cred_data["connection_id"],
+                #)
+                end_time = time.perf_counter()
+                log_timing_method(method, start_time, end_time, True)
+                pass
+
         except Exception as exc:
-            print(exc)
+            print("got credential exception:", exc)
             # if cred_data is not set we don't have a credential to set status for
+            end_time = time.perf_counter()
             if cred_data:
                 add_credential_exception_report(
                     cred_data["credential_exchange_id"], exc
                 )
+                data={
+                    'thread_id':cred_data["thread_id"], 
+                    'credential_exchange_id':cred_data["credential_exchange_id"], 
+                    'Error': str(exc),
+                    'elapsed_time': (end_time-start_time)
+                }
+            else:
+                data={
+                    'Error': str(exc),
+                    'elapsed_time': (end_time-start_time)
+                }
+            log_timing_method(method, start_time, end_time, False, 
+                data=data
+            )
             # don't re-raise; we want to log the exception as the credential error response
 
         self.cred_response = get_credential_response(
             cred_data["credential_exchange_id"]
         )
-        print("Got response", self.cred_response)
+        processing_time = end_time - start_time
+        #print("Got response", self.cred_response, "time=", processing_time)
 
 
 def handle_send_credential(cred_input):
@@ -439,8 +578,13 @@ def handle_send_credential(cred_input):
     """
     # construct and send the credential
     # print("Received credentials", cred_input)
+    global app_config
 
     agent_admin_url = app_config["AGENT_ADMIN_URL"]
+
+    start_time = time.perf_counter()
+    processing_time = 0
+    processed_count = 0
 
     # let's send a credential!
     cred_responses = []
@@ -461,5 +605,10 @@ def handle_send_credential(cred_input):
         thread.start()
         thread.join()
         cred_responses.append(thread.cred_response)
+        processed_count = processed_count + 1
+
+    processing_time = time.perf_counter() - start_time
+    print(">>> Processed", processed_count, "credentials in", processing_time)
+    print("   ", processing_time/processed_count, "seconds per credential")
 
     return jsonify(cred_responses)

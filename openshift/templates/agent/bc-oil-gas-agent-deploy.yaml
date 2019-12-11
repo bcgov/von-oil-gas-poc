@@ -129,7 +129,8 @@ objects:
                   --$([[ ! -z "${AGENT_ADMIN_API_KEY}" ]] && echo "admin-api-key ${AGENT_ADMIN_API_KEY}" || echo "admin-insecure-mode")
                   --label "${AGENT_NAME}"
                   --log-level ${AGENT_LOG_LEVEL}
-                  --protocol indy_catalyst_issuer_registration);
+                  $([[ ! -z "${TIMING}" ]] && echo "--timing" || echo "")
+                  --plugin indy_catalyst_issuer_registration);
               env:
                 - name: GENESIS_URL
                   value: ${GENESIS_FILE_URL}
@@ -278,12 +279,12 @@ parameters:
     displayName: Agent endpoint
     description: The endpoint of the agent
     required: true
-    value: https://bc-oil-and-gas-agent-dev.pathfinder.gov.bc.ca
+    value: https://bc-oil-gas-agent-dev.pathfinder.gov.bc.ca
   - name: WEBHOOK_URL
     displayName: Webhook URL
     description: The webhook endpoint
     required: true
-    value: http://bc-oil-and-gas-controller:8080/api/agentcb
+    value: http://bc-oil-gas-controller:8080/api/agentcb
   - name: AGENT_ADMIN_PORT
     displayName: Agent Admin Port
     description: The admin port on which the service will listen.

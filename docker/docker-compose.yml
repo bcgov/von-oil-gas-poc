@@ -12,64 +12,40 @@ services:
       WEB_HOST_TLS: ${WEB_HOST_TLS:-off}
       AGENT_HOST: ${AGENT_HOST:-controller}
       AGENT_PORT: ${AGENT_PORT:-8000}
-    links:
-      - myorg-controller:controller
     networks:
-      - myorg
+      - oil-gas
     ports:
       - ${WEB_HTTP_PORT:-5000}:${WEB_HOST_PORT:-8080}
     volumes:
       - caddyx-data:/root/.caddy
       - caddyx-logs:/srv/logs
 
-  myorg-controller:
+  oil-gas-controller:
     build:
       context: ../issuer_controller
       dockerfile: Dockerfile
     environment:
-      LEDGER_URL: ${LEDGER_URL}
-      APPLICATION_URL: ${APPLICATION_URL:-http://localhost:5001}
-      ENDPOINT_URL: ${ENDPOINT_URL:-http://localhost:5001}
       CONFIG_ROOT: ../config
+      HOST_PORT: ${CONTROLLER_PORT}
       ENVIRONMENT: ${ENVIRONMENT:-default}
-      ENABLE_GUNICORN: ${ENABLE_GUNICORN:-0}
-      INDY_LEDGER_URL: ${LEDGER_URL:-http://localhost:9000}
-      FORMS: ${FORMS}
-      ISSUERS: ${ISSUERS}
-      LOG_LEVEL: ${LOG_LEVEL}
-      PYTHON_ENV: ${PYTHON_ENV:-development}
-      TOB_API_URL: ${TOB_API_URL}
-      TOB_APP_URL: ${TOB_APP_URL}
-      WALLET_TYPE: ${WALLET_TYPE}
-      POSTGRESQL_WALLET_HOST: ${POSTGRESQL_WALLET_HOST}
-      POSTGRESQL_WALLET_PORT: ${POSTGRESQL_WALLET_PORT}
-      POSTGRESQL_WALLET_USER: ${POSTGRESQL_USER}
-      POSTGRESQL_WALLET_PASSWORD: ${POSTGRESQL_PASSWORD}
-      POSTGRESQL_WALLET_ADMIN_PASSWORD: ${POSTGRESQL_ADMIN_PASSWORD}
-      WALLET_ENCRYPTION_KEY: ${WALLET_ENCRYPTION_KEY}
-      WALLET_SEED_VONX: ${WALLET_SEED_VONX}
-      ISSUER_WALLET_DID: ${ISSUER_WALLET_DID}
-      HTTP_FORCE_CLOSE_CONNECTIONS: "true"
-      AGENT_ADMIN_URL: http://myorg-agent:${AGENT_ADMIN_PORT}
+      AGENT_ADMIN_URL: http://oil-gas-agent:${AGENT_ADMIN_PORT}
       AGENT_ADMIN_API_KEY: ${AGENT_ADMIN_API_KEY}
-      WEBHOOK_PORT: ${WEBHOOK_PORT}
-      TOB_CONNECTION_NAME: ${TOB_CONNECTION_NAME}
       TOB_AGENT_ADMIN_URL: ${TOB_AGENT_ADMIN_URL}
       TOB_ADMIN_API_KEY: ${TOB_ADMIN_API_KEY}
     networks:
       - orgbook
-      - myorg
+      - oil-gas
     ports:
-      - ${WEBHOOK_PORT}:${WEBHOOK_PORT}
+      - ${EXPOSED_CONTROLLER_PORT}:${CONTROLLER_PORT}
     depends_on:
-      - myorg-agent
+      - oil-gas-agent
     entrypoint: >
       /bin/bash -c "
         echo sleeping ...;
         sleep 15;
         ../docker-entrypoint.sh;"
 
-  myorg-agent:
+  oil-gas-agent:
     image: tob-agent
     environment:
       - LEDGER_URL=${LEDGER_URL}
@@ -82,20 +58,18 @@ services:
       - WALLET_ENCRYPTION_KEY=${WALLET_ENCRYPTION_KEY}
       - WALLET_SEED_VONX=${WALLET_SEED_VONX}
       - ISSUER_WALLET_DID=${ISSUER_WALLET_DID}
-      - WEBHOOK_URL=${WEBHOOK_HOST}/api/agentcb
+      - WEBHOOK_URL=${CONTROLLER_URL}/api/agentcb
       - AGENT_HTTP_IN_PORT=${AGENT_HTTP_IN_PORT}
-      - AGENT_WS_IN_PORT=${AGENT_WS_IN_PORT}
       - AGENT_ADMIN_PORT=${AGENT_ADMIN_PORT}
       - AGENT_NAME=${AGENT_NAME}
     networks:
       - orgbook
-      - myorg
+      - oil-gas
     ports:
       - ${AGENT_HTTP_IN_PORT}:${AGENT_HTTP_IN_PORT}
-      - ${AGENT_WS_IN_PORT}:${AGENT_WS_IN_PORT}
       - ${AGENT_ADMIN_PORT}:${AGENT_ADMIN_PORT}
     depends_on:
-      - myorg-wallet-db
+      - oil-gas-wallet-db
     entrypoint: /bin/bash
     command: [
         "-c",
@@ -103,9 +77,7 @@ services:
         sleep 5; \
         aca-py start \
         --inbound-transport http '0.0.0.0' ${AGENT_HTTP_IN_PORT} \
-        --inbound-transport ws '0.0.0.0' ${AGENT_WS_IN_PORT} \
         --endpoint ${AGENT_ENDPOINT} \
-        --outbound-transport ws \
         --outbound-transport http \
         --genesis-url '${LEDGER_URL}/genesis' \
         --auto-ping-connection \
@@ -116,7 +88,7 @@ services:
         --auto-accept-invites \
         --auto-accept-requests \
         --wallet-type 'indy' \
-        --wallet-name 'icat_agent_wallet' \
+        --wallet-name 'oil_gas_agent_wallet' \
         --wallet-key '${WALLET_ENCRYPTION_KEY}' \
         --wallet-storage-type '${WALLET_TYPE}' \
         --wallet-storage-config '{\"url\":\"${POSTGRESQL_WALLET_HOST}:${POSTGRESQL_WALLET_PORT}\",\"max_connections\":5}' \
@@ -125,11 +97,11 @@ services:
         --admin '0.0.0.0' ${AGENT_ADMIN_PORT} \
         --${AGENT_ADMIN_MODE} \
         --label ${AGENT_NAME} \
-        --protocol indy_catalyst_issuer_registration",
+        --plugin indy_catalyst_issuer_registration",
       ]
 
-  myorg-wallet-db:
-    image: registry.access.redhat.com/rhscl/postgresql-95-rhel7:9.5
+  oil-gas-wallet-db:
+    image: registry.access.redhat.com/rhscl/postgresql-10-rhel7:latest
     environment:
       - POSTGRESQL_USER=${POSTGRESQL_USER}
       - POSTGRESQL_PASSWORD=${POSTGRESQL_PASSWORD}
@@ -137,19 +109,19 @@ services:
       - POSTGRESQL_ADMIN_PASSWORD=${POSTGRESQL_ADMIN_PASSWORD}
     networks:
       - orgbook
-      - myorg
+      - oil-gas
     ports:
       - 5435:5432
     volumes:
-      - myorg-wallet-db:/var/lib/pgsql/data
+      - oil-gas-wallet-db:/var/lib/pgsql/data
 
 volumes:
   caddyx-data:
   caddyx-logs:
-  myorg-wallet-db:
+  oil-gas-wallet-db:
 
 networks:
-  myorg:
+  oil-gas:
   orgbook:
     external:
       name: tob_tob
