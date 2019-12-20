@@ -86,8 +86,8 @@ The agent will automatically create and activate the connection with OrgBook, pr
 }
 ```
 
-3. Use the `presentation_exchange_id` to call the `/present-proof/records/{pres_ex_id}` endpoint on the agent admin interface, and verify that its state is "presentation_received".
+3. Wait a few seconds to let the agents communicate and sync, then use the `presentation_exchange_id` to call the `/present-proof/records/{pres_ex_id}` endpoint on the agent admin interface. The presentation exchange state should be "verified", as we will probably have started the agent using the `--auto-verify-presentation` flag. If the state is "presentation_received" it could be either because:
 
-4. Using the same `presentation_exchange_id` now call the `/present-proof/records/{pres_ex_id}/verify-presentation` endpoint on the agent admin interface to complete the cyptographic verification of the credential.
+- we have not started the agent with the `--auto-verify-presentation` flag: we will then need to use the same `presentation_exchange_id` and call the `/present-proof/records/{pres_ex_id}/verify-presentation` endpoint on the agent admin interface to complete the cyptographic verification of the credential.
 
-_Please note:_ due to a bug in [indy-sdk](https://github.com/hyperledger/indy-sdk/pull/1893), verifying a proof using multiple values in `requested_attributes` will fail.
+- we are sending a presentation request that contains more than one restriction on attribute values: this will currently fail due to a bug in [indy-sdk](https://github.com/hyperledger/indy-sdk/pull/1893).
