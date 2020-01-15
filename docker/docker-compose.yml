@@ -46,7 +46,7 @@ services:
         ../docker-entrypoint.sh;"
 
   oil-gas-agent:
-    image: tob-agent
+    image: vcr-agent
     environment:
       - LEDGER_URL=${LEDGER_URL}
       - WALLET_TYPE=${WALLET_TYPE}
@@ -124,4 +124,4 @@ networks:
   oil-gas:
   orgbook:
     external:
-      name: tob_tob
+      name: vcr_vcr
